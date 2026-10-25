@@ -116,13 +116,14 @@ function renderMap() {
   document.getElementById("v-ratio").textContent = result.tamper_ratio ?? "-";
   document.getElementById("stats").hidden = false;
 }
-function load(orig, check, resultJson) {
+async function load(origFile, checkFile, resultFile) {
   const o = new Image(), c = new Image();
   o.onload = () => { state.orig = o; draw(document.getElementById("c-orig"), o); if (state.check) renderMap(); };
   c.onload = () => { state.check = c; draw(document.getElementById("c-check"), c); };
-  o.src = URL.createObjectURL(orig);
-  c.src = URL.createObjectURL(check);
-  state.result = JSON.parse(resultJson);
+  o.src = URL.createObjectURL(origFile);
+  c.src = URL.createObjectURL(checkFile);
+  state.result = JSON.parse(await resultFile.text());
+  renderMap();
 }
 document.getElementById("drop").addEventListener("dragover", e => e.preventDefault());
 document.getElementById("drop").addEventListener("drop", e => {

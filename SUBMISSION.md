@@ -11,7 +11,7 @@ HonestAngle
 
 https://github.com/draarivpatel-ui/honestangle
 
-This URL is a placeholder. The public repository will exist before submission.
+Live demo viewer: https://aariv.me/honestangle/demo/
 
 ## Summary (100 words)
 
@@ -36,7 +36,7 @@ checkable artifact instead of a promise.
 
 ## Demo video URL
 
-[ add the demo video URL before submission ]
+https://youtu.be/5p0ibDusbWY
 
 ## License
 
@@ -51,5 +51,5 @@ diffusion changes at block resolution with a pure standard library core and a
 self-checking receipt.
 
 Open Weights Only. The whole pipeline runs on open weights, the SD 1.5
-inpainting checkpoint under CreativeML Open RAIL-M, driven through pinned
+inpainting checkpoint under CreativeML Open RAIL-M, driven through
 open-source ComfyUI by a dependency-free Python tool.
