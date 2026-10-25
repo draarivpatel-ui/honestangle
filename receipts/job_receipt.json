@@ -1,0 +1,37 @@
+{
+  "accelerator": "Apple Silicon MPS (local GPU)",
+  "artifacts": {
+    "comfyui_output": {
+      "path": "ha_inpaint_00001_.png",
+      "sha256": "9330255a87d9ac0228c72d9c64840dbc4cb395ed98e099ecc1c5753ab69d9f8e"
+    },
+    "mask": {
+      "path": "ha_mask.png",
+      "sha256": "1742b72ae969422428c5495e27ff722d5bb559e93e7dfa4c9538e35f7838bcb6"
+    },
+    "original": {
+      "path": "ha_original.png",
+      "sha256": "8d40273ecb7ef7af37c392bb00ab0c3412a49b224b5db98e59109858b2b85269"
+    },
+    "receipt": {
+      "path": "gpu_run_receipt.json",
+      "sha256": "f2ac1345ec8b8f79fd60396af283578b0605a1727a45b3b2a1eb5b0e0211621c"
+    },
+    "results": {
+      "path": "gpu_run_results.json",
+      "sha256": "6da3beaafe0128744ca7bb5621ef8d61e7ca71872fa48ad2c6295d648f428e8a"
+    }
+  },
+  "blocks_changed": 256,
+  "blocks_total": 256,
+  "comfyui_commit": "19ae172bff6c9e4c738e7f2e00fe087f5b5b46ab",
+  "comfyui_log_sha256": "5284052348be05064f72ea2bad42ca1d320a8689f6bd4cf2281d2ba10c76048b",
+  "model": "sd-v1-5-inpainting.ckpt",
+  "model_license": "CreativeML Open RAIL-M (open weights)",
+  "prompt_id": "b6819013-e30e-44a1-be08-cc2babf5eeb0",
+  "run_host": "local",
+  "run_type": "local_mps_comfyui_openweights",
+  "tool": "honestangle",
+  "tool_version": "2.0.0",
+  "verdict": "REGENERATED"
+}

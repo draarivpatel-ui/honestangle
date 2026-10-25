@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HonestAngle proof viewer</title>
+<style>
+  :root {
+    --bg: #101613;
+    --panel: #18211c;
+    --ink: #e8f0ea;
+    --dim: #9db2a4;
+    --accent: #ffd166;
+    --line: #2a3a31;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 ui-sans-serif, system-ui, sans-serif;
+  }
+  header { padding: 28px 32px 8px; }
+  h1 { font: 700 26px/1.2 ui-serif, Georgia, serif; margin: 0 0 6px; }
+  header p { color: var(--dim); margin: 0; max-width: 62ch; }
+  main { padding: 16px 32px 48px; display: grid; gap: 20px; }
+  .drop {
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 22px;
+    background: var(--panel);
+    display: grid;
+    gap: 10px;
+  }
+  .drop strong { font-size: 15px; }
+  .drop span { color: var(--dim); font-size: 14px; }
+  .row { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
+  figure { margin: 0; }
+  figcaption { font-size: 13px; color: var(--dim); margin-top: 6px; }
+  canvas { border-radius: 6px; max-width: 100%; image-rendering: pixelated; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .stat b { display: block; font: 700 22px/1.1 ui-monospace, monospace; color: var(--accent); }
+  .stat span { font-size: 12.5px; color: var(--dim); }
+  label { font-size: 14px; color: var(--dim); }
+  select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>HonestAngle proof viewer</h1>
+  <p>Drop the original image, the image to check, and the results JSON exported by
+  <code>honestangle verify --json-out</code>. Everything renders locally; nothing is uploaded.
+  The verifier of record is the Python CLI; this page visualizes its block results.</p>
+</header>
+<main>
+  <div class="drop" id="drop">
+    <strong>Load three files</strong>
+    <span>original.png (the receipted original), check.png (the image to verify), results.json</span>
+    <span>Or press the sample button to see a built-in synthetic proof with an 8 block edit.</span>
+    <div>
+      <button id="sample">Show synthetic sample</button>
+      <label for="gran">coarsen blocks to
+        <select id="gran"><option>1x</option><option>2x</option><option>4x</option></select>
+      </label>
+    </div>
+  </div>
+  <div class="stats" id="stats" hidden>
+    <div class="stat"><b id="v-verdict">-</b><span>verdict</span></div>
+    <div class="stat"><b id="v-total">-</b><span>blocks total</span></div>
+    <div class="stat"><b id="v-changed">-</b><span>blocks changed</span></div>
+    <div class="stat"><b id="v-ratio">-</b><span>tamper ratio</span></div>
+  </div>
+  <div class="row">
+    <figure><canvas id="c-orig"></canvas><figcaption>original</figcaption></figure>
+    <figure><canvas id="c-check"></canvas><figcaption>checked image</figcaption></figure>
+    <figure><canvas id="c-map"></canvas><figcaption>provenance map (changed blocks lit)</figcaption></figure>
+  </div>
+</main>
+<script>
+"use strict";
+const state = { orig: null, check: null, result: null, factor: 1 };
+
+function draw(canvas, img) {
+  canvas.width = img.width; canvas.height = img.height;
+  canvas.getContext("2d").drawImage(img, 0, 0);
+}
+function litBlocks(result, factor) {
+  // merge changed 16px-level blocks into factor x factor superblocks
+  const set = new Set();
+  for (const b of result.blocks) if (!b.matched) {
+    set.add(Math.floor(b.row / factor) + ":" + Math.floor(b.col / factor));
+  }
+  return set;
+}
+function renderMap() {
+  const { result, factor } = state;
+  if (!result) return;
+  const cv = document.getElementById("c-map");
+  const img = state.orig;
+  cv.width = img.width; cv.height = img.height;
+  const ctx = cv.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  const base = result.blocks[0] ? result.blocks[0].w : 16; // committed block width
+  const size = base * factor;
+  ctx.fillStyle = "rgba(255, 86, 48, 0.52)";
+  const lit = litBlocks(result, factor);
+  for (const b of result.blocks) {
+    const key = Math.floor(b.row / factor) + ":" + Math.floor(b.col / factor);
+    if (lit.has(key)) ctx.fillRect(b.x, b.y, b.w, b.h);
+  }
+  document.getElementById("v-verdict").textContent = result.verdict;
+  document.getElementById("v-total").textContent = result.blocks_total;
+  document.getElementById("v-changed").textContent = result.blocks_changed;
+  document.getElementById("v-ratio").textContent = result.tamper_ratio ?? "-";
+  document.getElementById("stats").hidden = false;
+}
+function load(orig, check, resultJson) {
+  const o = new Image(), c = new Image();
+  o.onload = () => { state.orig = o; draw(document.getElementById("c-orig"), o); if (state.check) renderMap(); };
+  c.onload = () => { state.check = c; draw(document.getElementById("c-check"), c); };
+  o.src = URL.createObjectURL(orig);
+  c.src = URL.createObjectURL(check);
+  state.result = JSON.parse(resultJson);
+}
+document.getElementById("drop").addEventListener("dragover", e => e.preventDefault());
+document.getElementById("drop").addEventListener("drop", e => {
+  e.preventDefault();
+  const files = [...e.dataTransfer.files];
+  const pngs = files.filter(f => f.type === "image/png");
+  const js = files.find(f => f.name.endsWith(".json"));
+  if (pngs.length >= 2 && js) load(pngs[0], pngs[1], js);
+});
+document.getElementById("gran").addEventListener("change", e => {
+  state.factor = parseInt(e.target.value, 10);
+  renderMap();
+});
+document.getElementById("sample").addEventListener("click", () => {
+  // synthetic 128x128 scene with a 40x24 edit near (44, 52), block results at 16px
+  const W = 128, H = 128, B = 16;
+  const mk = (mutate) => {
+    const cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext("2d");
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, "#1d3a2a"); g.addColorStop(1, "#4b6b52");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#e0a458"; ctx.beginPath(); ctx.arc(38, 44, 22, 0, 7); ctx.fill();
+    ctx.fillStyle = "#3d8f6b"; ctx.beginPath(); ctx.arc(92, 84, 15, 0, 7); ctx.fill();
+    if (mutate) {
+      const id = ctx.getImageData(44, 52, 40, 24);
+      for (let i = 0; i < id.data.length; i += 4) {
+        id.data[i] = 255 - id.data[i];
+        id.data[i+1] = (id.data[i+1] + 90) % 256;
+      }
+      ctx.putImageData(id, 44, 52);
+    }
+    return cv;
+  };
+  const blocks = [];
+  for (let r = 0; r < H / B; r++) for (let c = 0; c < W / B; c++) {
+    const x = c * B, y = r * B;
+    const hit = x >= 32 && x < 96 && y >= 48 && y < 80; // edit spans x 44..84, y 52..76
+    blocks.push({ row: r, col: c, x, y, w: B, h: B, matched: !hit });
+  }
+  const changed = blocks.filter(b => !b.matched).length;
+  state.result = {
+    verdict: "TAMPERED", blocks_total: blocks.length, blocks_matched: blocks.length - changed,
+    blocks_changed: changed, tamper_ratio: +(changed / blocks.length).toFixed(4), blocks,
+  };
+  const toImg = cv => { const i = new Image(); i.src = cv.toDataURL(); return i; };
+  const o = toImg(mk(false)), c = toImg(mk(true));
+  o.onload = () => { state.orig = o; draw(document.getElementById("c-orig"), o); renderMap(); };
+  c.onload = () => { state.check = c; draw(document.getElementById("c-check"), c); };
+});
+</script>
+</body>
+</html>
