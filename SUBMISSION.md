@@ -38,6 +38,10 @@ checkable artifact instead of a promise.
 
 https://youtu.be/5p0ibDusbWY
 
+## Social post (live)
+
+https://x.com/MonkeyRunStore/status/2114429022197137427
+
 ## License
 
 Apache-2.0 for the code, copyright 2026 Aariv Patel. The SD 1.5 inpainting

@@ -1,4 +1,4 @@
-# Social drafts
+# Social drafts (X post is LIVE: https://x.com/MonkeyRunStore/status/2114429022197137427; r/comfyui writeup below is authorized by Billy, not yet posted)
 
 Drafts for the HonestAngle launch. Neither is posted yet; the repository link
 resolves once the public repo is up.
