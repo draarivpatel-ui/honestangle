@@ -36,9 +36,6 @@ def cmd_verify(args):
             print("  changed block at x=%d y=%d w=%d h=%d" % (x, y, w, h))
         if len(rects) > args.max_rects:
             print("  ... and %d more" % (len(rects) - args.max_rects))
-    elif result["verdict"] in ("VERIFIED", "CHANGED"):
-        print("root now       : %s" % result.get("root_now", ""))
-        print("root receipt   : %s" % result.get("root_receipt", ""))
     if not intact:
         return 2
     return 0 if result["verdict"] == "VERIFIED" else 1
