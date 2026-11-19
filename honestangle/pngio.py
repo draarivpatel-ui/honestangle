@@ -48,7 +48,6 @@ def _paeth(a, b, c):
 def _unfilter(raw, width, height, channels):
     stride = width * channels
     out = bytearray(stride * height)
-    prev = memoryview(out)[:0]
     pos = 0
     for y in range(height):
         ft = raw[pos]
@@ -78,7 +77,6 @@ def _unfilter(raw, width, height, channels):
         else:
             raise PngError("unknown filter type %d" % ft)
         out[y * stride:(y + 1) * stride] = row
-        prev = row
     return bytes(out)
 
 
@@ -112,14 +110,6 @@ def read_png(path):
         raise PngError("unexpected decompressed size")
     pixels = _unfilter(raw, width, height, channels)
     return width, height, channels, pixels
-
-
-def _filter_none(rows):
-    out = bytearray()
-    for row in rows:
-        out.append(0)
-        out.extend(row)
-    return bytes(out)
 
 
 def write_png_file(path, width, height, channels, pixels):
