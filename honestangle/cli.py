@@ -1,6 +1,5 @@
 """HonestAngle command line: init, verify, report. Stdlib only."""
 import argparse
-import json
 import sys
 
 from .receipt import create_receipt, load_receipt, receipt_intact, write_receipt
